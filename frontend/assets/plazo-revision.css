@@ -1,0 +1,209 @@
+.plazo-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1.2;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+.plazo-badge--en_tiempo {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+.plazo-badge--por_vencer {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fcd34d;
+}
+.plazo-badge--vencido {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.header-notif-wrap {
+    position: relative;
+}
+.header-notif-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.header-notif-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+}
+.header-notif-btn svg {
+    width: 1rem;
+    height: 1rem;
+}
+.header-notif-count {
+    position: absolute;
+    top: -0.25rem;
+    right: -0.25rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 0.25rem;
+    border-radius: 9999px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    line-height: 1rem;
+    text-align: center;
+}
+.notif-plazo-panel {
+    position: absolute;
+    top: calc(100% + 0.45rem);
+    right: 0;
+    width: min(22rem, calc(100vw - 1.5rem));
+    max-height: 22rem;
+    overflow: auto;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+    z-index: 80;
+    padding: 0.5rem;
+}
+.notif-plazo-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0.45rem 0.55rem;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 0.35rem;
+}
+.notif-plazo-panel-head h4 {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: #0f172a;
+    flex: 1;
+    min-width: 0;
+}
+.notif-plazo-mark-all {
+    flex-shrink: 0;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #0066CC;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.notif-plazo-mark-all:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.notif-plazo-item-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.25rem;
+    margin-bottom: 0.35rem;
+}
+.notif-plazo-item-row .notif-plazo-item {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+}
+.notif-plazo-item-mark {
+    flex-shrink: 0;
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.375rem;
+    background: #fff;
+    color: #64748b;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.notif-plazo-item-mark svg {
+    width: 0.875rem;
+    height: 0.875rem;
+}
+.notif-plazo-item-mark:hover {
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    color: #047857;
+}
+.notif-plazo-empty {
+    margin: 0.75rem 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    text-align: center;
+}
+.notif-plazo-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.65rem;
+    border: none;
+    border-radius: 0.5rem;
+    background: #f8fafc;
+    cursor: pointer;
+}
+.notif-plazo-item:hover {
+    background: #eff6ff;
+}
+.notif-plazo-item--leida {
+    opacity: 0.65;
+}
+.notif-plazo-item--participacion {
+    border-left: 3px solid #0066CC;
+}
+.notif-plazo-item-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.4rem;
+    border-radius: 9999px;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #dbeafe;
+    color: #1d4ed8;
+    margin-bottom: 0.15rem;
+}
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.notif-plazo-item-msg {
+    font-size: 0.6875rem;
+    color: #475569;
+    line-height: 1.35;
+}
+.notif-plazo-item-date {
+    font-size: 0.625rem;
+    color: #94a3b8;
+}
+
+.rev-table-plazo {
+    display: inline-block;
+    margin-left: 0.35rem;
+    vertical-align: middle;
+}

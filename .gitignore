@@ -1,0 +1,16 @@
+# Archivos subidos por usuarios (no versionar)
+uploads/*
+!uploads/.gitkeep
+
+# Logs locales
+logs/*
+!logs/.gitkeep
+*.log
+
+# Configuración con credenciales de BD
+config.php
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
