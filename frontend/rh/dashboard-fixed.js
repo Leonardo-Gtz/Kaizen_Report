@@ -690,6 +690,10 @@ function actualizarBotonExportar() {
     btn.title = `Exportar ${pendientes.length} reporte(s) de ${nombreMes} ${anio} como Reporte_Kaizen_${anio}_${nombreMes}.xlsx`;
 }
 
+function esReporteBorrador(reporte) {
+    return String(reporte?.estado || '').toLowerCase() === 'borrador';
+}
+
 function aplicarFiltros() {
     const texto = document.getElementById('filtroTexto').value.toLowerCase();
     const estadoSup = document.getElementById('filtroEstadoSupervisor').value;
@@ -704,6 +708,8 @@ function aplicarFiltros() {
     const mesRapido = document.getElementById('filtroMesRapido').value;
 
     reportesFiltrados = reportesGlobal.filter(r => {
+        const claveFlujo = obtenerClaveEstadoFlujo(r);
+        if (!estadoFlujo && claveFlujo === 'borrador') return false;
         if (texto && !r.tema.toLowerCase().includes(texto) &&
             !r.id.toString().includes(texto) &&
             !r.participantes.toLowerCase().includes(texto)) return false;
@@ -907,6 +913,9 @@ function renderizarReportes() {
 }
 
 function getEstadoReporte(r) {
+    if (esReporteBorrador(r)) {
+        return { label: 'Borrador', cls: 'bg-gray-100 text-gray-700 ring-1 ring-gray-200' };
+    }
     const aprobados = ['aprobado', 'autorizado', 'aceptado'];
     const rechazados = ['rechazado'];
     if (rechazados.includes(r.estadoSupervisor) || rechazados.includes(r.estadoGerente) || rechazados.includes(r.estadoRH)) {
@@ -1055,6 +1064,16 @@ function cambiarPagina(accion) {
 const ASPECTOS_EVALUACION_RH = ['Calidad', 'Innovación', 'Impacto'];
 
 function obtenerFlujoRhReporte(reporte) {
+    if (esReporteBorrador(reporte)) {
+        return {
+            fase: 'borrador',
+            mensaje: 'Este reporte aún está en borrador y no ha entrado al flujo de aprobación.',
+            puedeCalificar: false,
+            puedeAceptar: false,
+            puedeRechazar: false
+        };
+    }
+
     const estadoRh = reporte.estadoRH || 'pendiente';
     const estadoSup = reporte.estadoSupervisor || 'pendiente';
     const estadoGer = reporte.estadoGerente || 'pendiente';
@@ -2594,6 +2613,7 @@ function calcularEmbudoStats(reportes) {
 
 function filtrarReportesStatsCriterio(criterio) {
     return reportesGlobal.filter(r => {
+        if (esReporteBorrador(r)) return false;
         if (!r.fecha) return false;
         const partes = r.fecha.split('-');
         const y = partes[0];

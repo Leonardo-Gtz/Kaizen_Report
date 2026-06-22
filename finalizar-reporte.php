@@ -33,8 +33,8 @@ try {
 
     $conexion->autocommit(false);
 
-    // Validar que el reporte existe y es un borrador
-    $sqlCheck = "SELECT id, estado FROM reportes WHERE id = ? AND estado = 'borrador'";
+    // Validar que el reporte existe, es borrador y tiene imágenes obligatorias
+    $sqlCheck = "SELECT id, estado, imagen_anterior, imagen_mejora FROM reportes WHERE id = ? AND estado = 'borrador'";
     $stmtCheck = $conexion->prepare($sqlCheck);
     $stmtCheck->bind_param('i', $idReporte);
     $stmtCheck->execute();
@@ -42,6 +42,13 @@ try {
     
     if ($result->num_rows === 0) {
         throw new Exception('Borrador no encontrado o ya finalizado');
+    }
+
+    $borrador = $result->fetch_assoc();
+    $imgAnterior = trim((string) ($borrador['imagen_anterior'] ?? ''));
+    $imgMejora = trim((string) ($borrador['imagen_mejora'] ?? ''));
+    if ($imgAnterior === '' || $imgMejora === '') {
+        throw new Exception('El reporte debe incluir imagen anterior e imagen de mejora antes de enviarse');
     }
     $stmtCheck->close();
 

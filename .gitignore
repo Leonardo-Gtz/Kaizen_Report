@@ -9,6 +9,7 @@ logs/*
 
 # Configuración con credenciales de BD
 config.php
+sync-config.php
 
 # Sistema operativo
 .DS_Store

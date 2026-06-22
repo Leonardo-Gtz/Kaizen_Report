@@ -23,7 +23,7 @@ try {
             FROM reportes r
             LEFT JOIN evaluaciones e ON r.id = e.id_reporte
             LEFT JOIN reporte_participantes rp ON r.id = rp.id_reporte
-            WHERE r.estado = 'finalizado'
+            WHERE r.estado IN ('finalizado', 'borrador')
             GROUP BY r.id, r.tema, r.fecha, r.fecha_creacion, r.estado, r.estadoRH, r.estadoSupervisor, r.estadoGerente, r.exportado,
                      r.fecha_limite_revision, r.mes_efectivo, r.fuera_tiempo, r.fecha_finalizacion,
                      e.clasificacion, e.aspectos_evaluados
