@@ -27,7 +27,7 @@ try {
             GROUP BY r.id, r.tema, r.fecha, r.fecha_creacion, r.estado, r.estadoRH, r.estadoSupervisor, r.estadoGerente, r.exportado,
                      r.fecha_limite_revision, r.mes_efectivo, r.fuera_tiempo, r.fecha_finalizacion,
                      e.clasificacion, e.aspectos_evaluados
-            ORDER BY r.fecha_creacion DESC, r.id DESC";
+            ORDER BY r.id DESC";
     
     $result = $conexion->query($sql);
     

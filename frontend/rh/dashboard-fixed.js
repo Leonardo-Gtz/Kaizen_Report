@@ -2,7 +2,7 @@ let reportesGlobal = [];
 let reportesFiltrados = [];
 let empleadosGlobal = [];
 let paginaActual = 1;
-const reportesPorPagina = 15;
+const reportesPorPagina = 30;
 let seccionActiva = 'inicio';
 let jerarquiaStats = {};
 
@@ -294,14 +294,15 @@ function obtenerValoresFiltrosInicio() {
         estadoFlujo: val('filtroEstadoFlujo'),
         exportado: val('filtroExportado'),
         anioRapido: val('filtroAnioRapido'),
-        mesRapido: val('filtroMesRapido')
+        mesRapido: val('filtroMesRapido'),
+        diaRapido: val('filtroDiaRapido')
     };
 }
 
 function hayFiltrosActivosInicio() {
     const f = obtenerValoresFiltrosInicio();
     return !!(f.texto || f.estadoSupervisor || f.estadoGerente || f.estadoRH || f.clasificacion ||
-        f.departamento || f.aspecto || f.estadoFlujo || f.exportado || f.anioRapido || f.mesRapido);
+        f.departamento || f.aspecto || f.estadoFlujo || f.exportado || f.anioRapido || f.mesRapido || f.diaRapido);
 }
 
 function obtenerChipsFiltrosActivos() {
@@ -316,6 +317,12 @@ function obtenerChipsFiltrosActivos() {
     if (f.aspecto) chips.push({ key: 'aspecto', label: `Aspecto: ${f.aspecto}` });
     if (f.anioRapido) chips.push({ key: 'anioRapido', label: `Año: ${f.anioRapido}` });
     if (f.mesRapido) chips.push({ key: 'mesRapido', label: `Mes: ${MESES_FILTRO_LABEL[f.mesRapido] || f.mesRapido}` });
+    if (f.diaRapido) {
+        const diaLabel = f.mesRapido && f.anioRapido
+            ? `${f.diaRapido} ${MESES_FILTRO_LABEL[f.mesRapido] || f.mesRapido} ${f.anioRapido}`
+            : `Día: ${f.diaRapido}`;
+        chips.push({ key: 'diaRapido', label: diaLabel });
+    }
     if (f.estadoFlujo) chips.push({ key: 'estadoFlujo', label: `Estado: ${ESTADO_FLUJO_LABEL[f.estadoFlujo] || f.estadoFlujo}` });
     if (f.exportado === '1') chips.push({ key: 'exportado', label: 'Exportado: Sí' });
     if (f.exportado === '0') chips.push({ key: 'exportado', label: 'Exportado: No' });
@@ -334,7 +341,8 @@ function quitarFiltroActivoInicio(key) {
         estadoFlujo: 'filtroEstadoFlujo',
         exportado: 'filtroExportado',
         anioRapido: 'filtroAnioRapido',
-        mesRapido: 'filtroMesRapido'
+        mesRapido: 'filtroMesRapido',
+        diaRapido: 'filtroDiaRapido'
     };
     const el = document.getElementById(map[key]);
     if (!el) return;
@@ -440,11 +448,14 @@ function irAKpiFiltroMes() {
     if (mesActivo) {
         if (filtroAnio) filtroAnio.value = '';
         if (filtroMes) filtroMes.value = '';
+        const filtroDia = document.getElementById('filtroDiaRapido');
+        if (filtroDia) filtroDia.value = '';
     } else {
         if (filtroAnio) filtroAnio.value = anio;
         if (filtroMes) filtroMes.value = mes;
         if (filtroRH) filtroRH.value = '';
     }
+    poblarFiltroDiaRapido();
     aplicarFiltros();
 }
 
@@ -519,7 +530,7 @@ async function cargarReportes() {
         reportesGlobal = data.reportes || [];
         reportesFiltrados = [...reportesGlobal];
         poblarFiltros();
-        establecerAnioActual();
+        poblarFiltroDiaRapido();
         aplicarFiltros();
     } catch (error) {
         console.error('Error al cargar reportes:', error);
@@ -528,6 +539,119 @@ async function cargarReportes() {
                 '<tr><td colspan="9" class="px-4 py-8 text-center text-red-500">Error al cargar reportes</td></tr>';
         }
     }
+}
+
+async function sincronizarReportesProduccion() {
+    const btn = document.getElementById('btnSyncReportesProd');
+    const label = document.getElementById('labelSyncReportesProd');
+    const icon = document.getElementById('iconSyncReportesProd');
+
+    const confirmar = confirm(
+        '¿Sincronizar reportes desde producción (.24)?\n\n'
+        + 'Se copiarán reportes, participantes y evaluaciones nuevos.\n'
+        + 'También se descargarán fotos/PDF faltantes (puede tardar unos minutos).\n'
+        + 'Solo para desarrollo local mientras el sistema oficial sigue en el servidor.'
+    );
+    if (!confirmar) return;
+
+    const labelPrevio = label?.textContent || 'Sync prod.';
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = 'Sincronizando...';
+    if (icon) icon.classList.add('animate-spin');
+
+    try {
+        const response = await fetch('../../api-sync-reportes-produccion.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'solo_bd=0'
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.mensaje || 'No se pudo sincronizar reportes.');
+            return;
+        }
+
+        let texto = data.mensaje || 'Sincronización completada.';
+        if (Array.isArray(data.detalle) && data.detalle.length) {
+            texto += '\n\n' + data.detalle.join('\n');
+        }
+        alert(texto);
+        await cargarReportes();
+    } catch (error) {
+        console.error('Error sync reportes prod:', error);
+        alert('Error de conexión al sincronizar reportes. Verifica red hacia .24 y sync-config.php.');
+    } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = labelPrevio;
+        if (icon) icon.classList.remove('animate-spin');
+    }
+}
+
+function diasEnMes(anio, mes) {
+    const y = parseInt(anio, 10);
+    const m = parseInt(mes, 10);
+    if (!y || !m) return 31;
+    return new Date(y, m, 0).getDate();
+}
+
+function normalizarFechaReporte(fecha) {
+    if (!fecha) return '';
+    return String(fecha).trim().substring(0, 10);
+}
+
+function poblarFiltroDiaRapido() {
+    const selectAnio = document.getElementById('filtroAnioRapido');
+    const selectMes = document.getElementById('filtroMesRapido');
+    const selectDia = document.getElementById('filtroDiaRapido');
+    if (!selectDia) return;
+
+    const anio = selectAnio?.value || '';
+    const mes = selectMes?.value || '';
+    const prev = selectDia.value;
+
+    selectDia.innerHTML = '<option value="">Día</option>';
+    selectDia.disabled = !anio || !mes;
+    selectDia.title = selectDia.disabled ? 'Selecciona año y mes primero' : 'Filtrar por día del reporte';
+
+    if (!anio || !mes) {
+        selectDia.value = '';
+        return;
+    }
+
+    const maxDias = diasEnMes(anio, mes);
+    const diasConReportes = new Set();
+    reportesGlobal.forEach(r => {
+        const f = normalizarFechaReporte(r.fecha);
+        if (f.startsWith(`${anio}-${mes}-`)) {
+            diasConReportes.add(f.substring(8, 10));
+        }
+    });
+
+    for (let d = 1; d <= maxDias; d++) {
+        const dd = String(d).padStart(2, '0');
+        const option = document.createElement('option');
+        option.value = dd;
+        const cuenta = [...diasConReportes].length ? (diasConReportes.has(dd) ? '' : ' · sin reportes') : '';
+        option.textContent = dd + cuenta;
+        selectDia.appendChild(option);
+    }
+
+    if (prev && parseInt(prev, 10) <= maxDias) {
+        selectDia.value = prev;
+    }
+}
+
+function onCambioPeriodoRapido() {
+    const selectAnio = document.getElementById('filtroAnioRapido');
+    const selectMes = document.getElementById('filtroMesRapido');
+    const selectDia = document.getElementById('filtroDiaRapido');
+    if (!selectAnio?.value || !selectMes?.value) {
+        if (selectDia) selectDia.value = '';
+    }
+    poblarFiltroDiaRapido();
+    aplicarFiltros();
 }
 
 function establecerAnioActual() {
@@ -706,6 +830,7 @@ function aplicarFiltros() {
     const filtroExportado = document.getElementById('filtroExportado')?.value || '';
     const anioRapido = document.getElementById('filtroAnioRapido').value;
     const mesRapido = document.getElementById('filtroMesRapido').value;
+    const diaRapido = document.getElementById('filtroDiaRapido')?.value || '';
 
     reportesFiltrados = reportesGlobal.filter(r => {
         const claveFlujo = obtenerClaveEstadoFlujo(r);
@@ -722,10 +847,17 @@ function aplicarFiltros() {
         if (estadoFlujo && obtenerClaveEstadoFlujo(r) !== estadoFlujo) return false;
         if (filtroExportado === '1' && !esReporteExportado(r)) return false;
         if (filtroExportado === '0' && esReporteExportado(r)) return false;
-        if (anioRapido && !r.fecha.startsWith(anioRapido)) return false;
-        if (mesRapido && !r.fecha.includes('-' + mesRapido + '-')) return false;
+        const fechaRep = String(r.fecha || '');
+        if (anioRapido && !fechaRep.startsWith(anioRapido)) return false;
+        if (mesRapido && !fechaRep.includes('-' + mesRapido + '-')) return false;
+        if (diaRapido && anioRapido && mesRapido) {
+            const claveDia = `${anioRapido}-${mesRapido}-${diaRapido}`;
+            if (normalizarFechaReporte(r.fecha) !== claveDia) return false;
+        }
         return true;
     });
+
+    reportesFiltrados.sort((a, b) => Number(b.id) - Number(a.id));
     
     const textoContador = `${reportesFiltrados.length} de ${reportesGlobal.length} reportes`;
     const contador = document.getElementById('contadorFiltros');
@@ -755,6 +887,9 @@ function limpiarFiltros() {
 function limpiarFiltrosRapidos() {
     document.getElementById('filtroAnioRapido').value = '';
     document.getElementById('filtroMesRapido').value = '';
+    const filtroDia = document.getElementById('filtroDiaRapido');
+    if (filtroDia) filtroDia.value = '';
+    poblarFiltroDiaRapido();
     aplicarFiltros();
 }
 
@@ -989,10 +1124,16 @@ async function exportarReportesFiltrados() {
         const responseReportes = await fetch('../../api-reportes.php');
         const dataReportes = await responseReportes.json();
         if (dataReportes.success) {
+            const dia = document.getElementById('filtroDiaRapido')?.value || '';
             reportesGlobal = dataReportes.reportes;
             poblarFiltros();
             document.getElementById('filtroAnioRapido').value = anio;
             document.getElementById('filtroMesRapido').value = mes;
+            poblarFiltroDiaRapido();
+            if (dia) {
+                const filtroDia = document.getElementById('filtroDiaRapido');
+                if (filtroDia) filtroDia.value = dia;
+            }
             aplicarFiltros();
         }
     } catch (error) {
@@ -1662,6 +1803,54 @@ async function cargarEmpleados() {
         }
     } catch (error) {
         console.error('Error:', error);
+    }
+}
+
+async function sincronizarEmpleadosAbm() {
+    const btn = document.getElementById('btnSyncEmpleadosAbm');
+    const label = document.getElementById('labelSyncEmpleadosAbm');
+    const icon = document.getElementById('iconSyncEmpleadosAbm');
+
+    const confirmar = confirm(
+        '¿Sincronizar empleados desde ABM (.24)?\n\n'
+        + 'Se copiarán solo: ID, nombre, apellidos y departamento.\n'
+        + 'Solo empleados activos (Status = 1). Los inactivos (Status = 0) se marcan de baja en local.\n'
+        + 'Los nuevos recibirán contraseña temporal y deberán cambiarla al primer ingreso.'
+    );
+    if (!confirmar) return;
+
+    const labelPrevio = label?.textContent || 'Sincronizar ABM';
+    if (btn) btn.disabled = true;
+    if (label) label.textContent = 'Sincronizando...';
+    if (icon) icon.classList.add('animate-spin');
+
+    try {
+        const response = await fetch('../../api-sync-empleados-abm.php', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: 'dry_run=0'
+        });
+        const data = await response.json();
+
+        if (!data.success) {
+            alert(data.mensaje || 'No se pudo sincronizar empleados.');
+            return;
+        }
+
+        let texto = data.mensaje || 'Sincronización completada.';
+        if (data.aviso_password) {
+            texto += '\n\n' + data.aviso_password;
+        }
+        alert(texto);
+        await cargarEmpleados();
+    } catch (error) {
+        console.error('Error sync empleados ABM:', error);
+        alert('Error de conexión al sincronizar empleados.');
+    } finally {
+        if (btn) btn.disabled = false;
+        if (label) label.textContent = labelPrevio;
+        if (icon) icon.classList.remove('animate-spin');
     }
 }
 

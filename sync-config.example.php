@@ -34,4 +34,15 @@ return [
 
     // Actualizar reportes que ya existen en local pero cambiaron en prod (estados, etc.)
     'sync_reporte_updates' => true,
+
+    // Conexión a abm.tblemployees (.24): carpeta local htdocs/_shared/employees/config.php
+    // Solo desarrollo local; destino siempre es sync.local (empleados_ntn en tu PC).
+    // 'employees_shared_path' => 'C:/xampp/htdocs/_shared/employees',
+
+    // Sync: solo EmpId, FIrstName, LastName, SurName, Department → bd_ntn
+    'empleados_abm_sync' => [
+        'enabled' => true,
+        'temp_password' => 'Kaizen2026',
+        'actualizar_existentes' => true,
+    ],
 ];

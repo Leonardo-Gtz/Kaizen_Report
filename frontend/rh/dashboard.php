@@ -876,6 +876,19 @@ if (count($partesNombre) >= 2) {
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
+        .filtros-inline-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+        }
+        @media (max-width: 420px) {
+            .filtros-inline-3 {
+                grid-template-columns: 1fr 1fr;
+            }
+            .filtros-inline-3 #filtroDiaRapido {
+                grid-column: 1 / -1;
+            }
+        }
         .filtros-aprob-grid {
             display: grid;
             gap: 0.5rem;
@@ -3402,14 +3415,17 @@ if (count($partesNombre) >= 2) {
                             Período
                         </div>
                         <div class="filtros-card-body">
-                            <div class="filtros-inline-2">
-                                <select id="filtroAnioRapido" class="filtro-field" onchange="aplicarFiltros()"><option value="">Año</option></select>
-                                <select id="filtroMesRapido" class="filtro-field" onchange="aplicarFiltros()">
+                            <div class="filtros-inline-3">
+                                <select id="filtroAnioRapido" class="filtro-field" onchange="onCambioPeriodoRapido()"><option value="">Año</option></select>
+                                <select id="filtroMesRapido" class="filtro-field" onchange="onCambioPeriodoRapido()">
                                     <option value="">Mes</option>
                                     <option value="01">Ene</option><option value="02">Feb</option><option value="03">Mar</option>
                                     <option value="04">Abr</option><option value="05">May</option><option value="06">Jun</option>
                                     <option value="07">Jul</option><option value="08">Ago</option><option value="09">Sep</option>
                                     <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dic</option>
+                                </select>
+                                <select id="filtroDiaRapido" class="filtro-field" onchange="aplicarFiltros()" disabled title="Selecciona año y mes primero">
+                                    <option value="">Día</option>
                                 </select>
                             </div>
                         </div>
@@ -3581,10 +3597,16 @@ if (count($partesNombre) >= 2) {
                         <h2 class="block-card-title">Listado de reportes</h2>
                         <p class="block-card-sub" id="infoReportes">Cargando...</p>
                     </div>
-                    <button type="button" id="btnAbrirFiltros" onclick="toggleFiltros()" class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
-                        Filtros
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btnSyncReportesProd" onclick="sincronizarReportesProduccion()" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-sky-700 bg-sky-50 border border-sky-200 rounded-lg hover:bg-sky-100 transition shadow-sm" title="Traer reportes nuevos desde producción (.24)">
+                            <svg id="iconSyncReportesProd" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span id="labelSyncReportesProd">Sync prod.</span>
+                        </button>
+                        <button type="button" id="btnAbrirFiltros" onclick="toggleFiltros()" class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition shadow-sm">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd"/></svg>
+                            Filtros
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Tabla -->
@@ -3663,10 +3685,16 @@ if (count($partesNombre) >= 2) {
                         <h2 class="block-card-title">Equipo registrado</h2>
                         <p class="block-card-sub" id="infoEmpleados">Cargando...</p>
                     </div>
-                    <button onclick="abrirModalNuevoEmpleado()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
-                        <span>Nuevo empleado</span>
-                    </button>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" id="btnSyncEmpleadosAbm" onclick="sincronizarEmpleadosAbm()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition shadow-sm" title="Traer altas y cambios desde abm.tblemployees (.24)">
+                            <svg id="iconSyncEmpleadosAbm" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span id="labelSyncEmpleadosAbm">Sincronizar ABM</span>
+                        </button>
+                        <button onclick="abrirModalNuevoEmpleado()" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition shadow-sm">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
+                            <span>Nuevo empleado</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Buscador y filtros -->
