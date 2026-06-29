@@ -182,6 +182,19 @@ if (count($partesNombre) >= 2) {
             border-radius: 9999px;
             white-space: nowrap;
         }
+        .header-uso-interno-wrap {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            line-height: 0;
+        }
+        .header-uso-interno {
+            height: 3.75rem;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            flex-shrink: 0;
+        }
         @media (max-width: 420px) {
             .header-brand-reports {
                 display: none;
@@ -191,6 +204,9 @@ if (count($partesNombre) >= 2) {
             }
             .header-brand-kaizen {
                 font-size: 0.875rem;
+            }
+            .header-uso-interno {
+                height: 3.25rem;
             }
         }
         .header-nav {
@@ -3300,6 +3316,9 @@ if (count($partesNombre) >= 2) {
                     </span>
                 </span>
             </a>
+            <span class="header-uso-interno-wrap">
+                <img class="header-uso-interno" src="<?php echo kaizen_asset_href('../assets/Imagen1.png', __DIR__ . '/../assets/Imagen1.png'); ?>" alt="Uso interno exclusivo">
+            </span>
 
             <nav class="header-nav" aria-label="Navegación principal">
                 <div class="header-nav-track">

@@ -298,6 +298,9 @@ if (count($partesNombre) >= 2) {
                     </span>
                 </span>
             </a>
+            <span class="header-uso-interno-wrap">
+                <img class="header-uso-interno" src="<?php echo kaizen_asset_href('../assets/Imagen1.png', __DIR__ . '/../assets/Imagen1.png'); ?>" alt="Uso interno exclusivo">
+            </span>
 
             <nav class="header-nav" aria-label="Navegación principal">
                 <div class="header-nav-track">

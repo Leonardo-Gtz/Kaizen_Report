@@ -132,6 +132,24 @@ body.dashboard-app {
     border-radius: 9999px;
     white-space: nowrap;
 }
+.header-uso-interno-wrap {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    line-height: 0;
+}
+.header-uso-interno {
+    height: 3.75rem;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    flex-shrink: 0;
+}
+@media (max-width: 420px) {
+    .header-uso-interno {
+        height: 3.25rem;
+    }
+}
 .header-nav {
     flex: 1;
     min-width: 0;
