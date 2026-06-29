@@ -1144,7 +1144,7 @@
         </div>`;
     }
 
-    function renderEmpRowHtml(t, target) {
+    function renderEmpRowHtml(t) {
         const autEmp = Number(t.autorizados) || 0;
         const pctEmp = Number(t.pct) || 0;
         const pctBar = Math.min(100, pctEmp);
@@ -1155,7 +1155,7 @@
             <span class="gsup-emp-avatar" aria-hidden="true">${escHtml(inicialesNombreSup(t.nombre))}</span>
             <div class="gsup-emp-body">
                 <p class="gsup-emp-name" title="${escAttr(t.nombre)}">${escHtml(t.nombre)}</p>
-                <p class="gsup-emp-sub">${autEmp} autorizado${autEmp !== 1 ? 's' : ''} · meta ${escHtml(target)}</p>
+                <p class="gsup-emp-sub">${autEmp} autorizado${autEmp !== 1 ? 's' : ''}</p>
                 <div class="gsup-emp-bar-wrap"><div class="gsup-emp-bar" style="width:${pctBar}%;background:${barColor}"></div></div>
             </div>
             <span class="gsup-emp-pct${pctCls}">${formatPctMeta(pctEmp)}%</span>
@@ -1181,7 +1181,7 @@
             const searchName = String(d.supervisor_nombre || '').toLowerCase();
             const openCls = '';
             const trabRows = d.trabajadores?.length
-                ? d.trabajadores.map(t => renderEmpRowHtml(t, target)).join('')
+                ? d.trabajadores.map(t => renderEmpRowHtml(t)).join('')
                 : '<p class="gsup-emp-sub" style="padding:0.5rem 0">Sin trabajadores asignados</p>';
             const foot = pctAcum != null && d.autorizados > 0
                 ? `<p class="gsup-foot">Acumulado equipo: <strong>${formatPctMeta(pctAcum)}%</strong> · Total supervisor: <strong>${formatPctMeta(pctRaw)}%</strong></p>`
