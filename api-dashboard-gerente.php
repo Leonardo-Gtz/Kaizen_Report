@@ -10,6 +10,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'gerente') {
 }
 
 require 'conexion.php';
+require_once __DIR__ . '/jerarquia-gerente.php';
 
 try {
     $departamento = $_SESSION['usuario']['departamento'] ?? '';
@@ -61,16 +62,8 @@ try {
     $rechazados = $result->fetch_assoc()['total'];
     $stmt->close();
 
-    // Contar supervisores según la lista de IDs de la aplicación y del mismo departamento
-    $stmt = $conexion->prepare("SELECT COUNT(*) as total FROM bd_ntn WHERE EmpId IN (7, 9, 244, 14, 26, 27, 32, 44, 45, 62, 71, 73, 133, 135, 171, 181, 216, 249, 394, 608, 2113) AND UPPER(Department) = UPPER(?)");
-    $stmt->bind_param('s', $departamento);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        throw new Exception('Error SQL supervisores: ' . $conexion->error);
-    }
-    $supervisores = $result->fetch_assoc()['total'];
-    $stmt->close();
+    // Supervisores vinculados al gerente en jerarquía (misma lógica que organigrama RH)
+    $supervisores = contarSupervisoresGerente($conexion, intval($_SESSION['usuario']['id'] ?? 0));
     
     echo json_encode([
         'success' => true,

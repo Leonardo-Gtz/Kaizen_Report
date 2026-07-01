@@ -9,6 +9,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'gerente') {
 
 require 'conexion.php';
 require_once __DIR__ . '/includes/MetasDepartamento.php';
+require_once __DIR__ . '/jerarquia-gerente.php';
 
 try {
     $departamento = $_SESSION['usuario']['departamento'] ?? '';
@@ -33,81 +34,11 @@ try {
     }
 
     $supervisores = [];
-
-    // Supervisores asignados al gerente en jerarquía
-    $sqlJer = "SELECT DISTINCT j.supervisor_id AS id,
-                      TRIM(CONCAT(IFNULL(s.FIrstName, ''), ' ', IFNULL(s.LastName, ''))) AS nombre
-               FROM jerarquia j
-               INNER JOIN bd_ntn s ON j.supervisor_id = s.EmpId
-               WHERE j.activo = 1
-                 AND j.supervisor_id IS NOT NULL
-                 AND j.gerente_id = ?
-               ORDER BY nombre";
-    $stmtJer = $conexion->prepare($sqlJer);
-    if ($stmtJer) {
-        $stmtJer->bind_param('i', $gerenteId);
-        $stmtJer->execute();
-        $resJer = $stmtJer->get_result();
-        while ($row = $resJer->fetch_assoc()) {
-            $supervisores[(int) $row['id']] = [
-                'supervisor_id' => (int) $row['id'],
-                'supervisor_nombre' => trim($row['nombre']) ?: 'Supervisor',
-            ];
-        }
-        $stmtJer->close();
-    }
-
-    // Respaldo: supervisores del departamento (misma lista que el dashboard)
-    if (count($supervisores) === 0) {
-        $idsSupervisores = [7, 9, 244, 14, 26, 27, 32, 44, 45, 62, 71, 73, 133, 135, 171, 181, 216, 249, 394, 608, 2113];
-        $placeholders = implode(',', array_fill(0, count($idsSupervisores), '?'));
-        $sqlDep = "SELECT EmpId AS id,
-                          TRIM(CONCAT(IFNULL(FIrstName, ''), ' ', IFNULL(LastName, ''))) AS nombre
-                   FROM bd_ntn
-                   WHERE EmpId IN ($placeholders)
-                     AND UPPER(Department) = UPPER(?)
-                   ORDER BY nombre";
-        $stmtDep = $conexion->prepare($sqlDep);
-        if ($stmtDep) {
-            $types = str_repeat('i', count($idsSupervisores)) . 's';
-            $params = array_merge($idsSupervisores, [$departamento]);
-            $stmtDep->bind_param($types, ...$params);
-            $stmtDep->execute();
-            $resDep = $stmtDep->get_result();
-            while ($row = $resDep->fetch_assoc()) {
-                $supervisores[(int) $row['id']] = [
-                    'supervisor_id' => (int) $row['id'],
-                    'supervisor_nombre' => trim($row['nombre']) ?: 'Supervisor',
-                ];
-            }
-            $stmtDep->close();
-        }
-    }
-
-    // Respaldo: supervisores con equipo en el departamento vía jerarquía
-    if (count($supervisores) === 0) {
-        $sqlEquipo = "SELECT DISTINCT j.supervisor_id AS id,
-                             TRIM(CONCAT(IFNULL(s.FIrstName, ''), ' ', IFNULL(s.LastName, ''))) AS nombre
-                      FROM jerarquia j
-                      INNER JOIN bd_ntn e ON j.empleado_id = e.EmpId
-                      INNER JOIN bd_ntn s ON j.supervisor_id = s.EmpId
-                      WHERE j.activo = 1
-                        AND j.supervisor_id IS NOT NULL
-                        AND UPPER(e.Department) = UPPER(?)
-                      ORDER BY nombre";
-        $stmtEquipo = $conexion->prepare($sqlEquipo);
-        if ($stmtEquipo) {
-            $stmtEquipo->bind_param('s', $departamento);
-            $stmtEquipo->execute();
-            $resEquipo = $stmtEquipo->get_result();
-            while ($row = $resEquipo->fetch_assoc()) {
-                $supervisores[(int) $row['id']] = [
-                    'supervisor_id' => (int) $row['id'],
-                    'supervisor_nombre' => trim($row['nombre']) ?: 'Supervisor',
-                ];
-            }
-            $stmtEquipo->close();
-        }
+    foreach (obtenerSupervisoresGerente($conexion, $gerenteId) as $sup) {
+        $supervisores[$sup['id']] = [
+            'supervisor_id' => $sup['id'],
+            'supervisor_nombre' => $sup['nombre'],
+        ];
     }
 
     $sqlAut = "SELECT COUNT(DISTINCT r.id) AS total
