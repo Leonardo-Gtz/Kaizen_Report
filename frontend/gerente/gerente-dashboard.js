@@ -1043,11 +1043,11 @@
         return json;
     }
 
-    function actualizarSubtituloModalSupervisores(modal, anio, mes, target) {
+    function actualizarSubtituloModalSupervisores(modal, anio, mes) {
         const sub = modal.querySelector('[data-gerente-sup-sub]');
         if (!sub) return;
         const mesLabel = MESES_LARGOS[parseInt(mes, 10) - 1] || '';
-        sub.textContent = `${mesLabel} ${anio} · avance vs meta mensual (${target} autorizaciones)`;
+        sub.textContent = `${mesLabel} ${anio}`;
     }
 
     async function recargarModalSupervisores(modal) {
@@ -1063,7 +1063,7 @@
         try {
             const json = await fetchDatosSupervisores(anio, mes);
             const target = json.target || metaEfectiva() || META_HR_FALLBACK;
-            actualizarSubtituloModalSupervisores(modal, json.anio || anio, json.mes || mes, target);
+            actualizarSubtituloModalSupervisores(modal, json.anio || anio, json.mes || mes);
             content.innerHTML = renderSupervisoresModalBody(json.datos || [], json.anio || anio, json.mes || mes, target);
             bindGerenteSupModalInteractions(content);
         } catch (e) {
@@ -1313,7 +1313,7 @@
                             <span class="equipo-modal-avatar" aria-hidden="true">SP</span>
                             <div class="min-w-0">
                                 <h2 class="equipo-modal-title" id="gerenteSupModalTitle">Supervisores del área</h2>
-                                <p class="equipo-modal-sub" data-gerente-sup-sub>${escHtml(periodo)} · meta mensual: ${escHtml(target)} autorizaciones</p>
+                                <p class="equipo-modal-sub" data-gerente-sup-sub>${escHtml(periodo)}</p>
                             </div>
                             <button type="button" class="equipo-modal-close" data-cerrar-modal aria-label="Cerrar">
                                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
