@@ -34,6 +34,7 @@ if (count($partesNombre) >= 2) {
     <link rel="stylesheet" href="<?php echo kaizen_asset_href('../assets/logout-animation.css', __DIR__ . '/../assets/logout-animation.css'); ?>">
     <link rel="stylesheet" href="<?php echo kaizen_asset_href('../assets/dashboard-shell.css', __DIR__ . '/../assets/dashboard-shell.css'); ?>">
     <link rel="stylesheet" href="<?php echo kaizen_asset_href('../assets/plazo-revision.css', __DIR__ . '/../assets/plazo-revision.css'); ?>">
+    <link rel="stylesheet" href="<?php echo kaizen_asset_href('../assets/meta-resumen.css', __DIR__ . '/../assets/meta-resumen.css'); ?>">
     <style>
         section[id^="seccion-"]:not(.hidden) { animation: fadeSlideIn 0.25s ease both; }
         @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -184,6 +185,10 @@ if (count($partesNombre) >= 2) {
                             <p class="inicio-section-sub">Reportes autorizados por mes · <span id="anioDetalle"></span></p>
                         </div>
                         <div class="inicio-section-actions">
+                            <button type="button" class="inicio-resumen-btn" onclick="abrirModalResumenMetas(document.getElementById('anioSelector')?.value)" aria-label="Ver resumen de metas del departamento">
+                                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                Ver resumen
+                            </button>
                             <select id="anioSelector" class="equipo-select inicio-year-select" onchange="cargarEstadisticas()" aria-label="Año"></select>
                         </div>
                     </header>
@@ -309,6 +314,42 @@ if (count($partesNombre) >= 2) {
         </section>
 
     </main>
+
+    <div id="modalResumenMetas" class="meta-resumen-overlay hidden" onclick="if(event.target===this) cerrarModalResumenMetas()">
+        <div class="meta-mensual-modal meta-resumen-modal" onclick="event.stopPropagation()" role="dialog" aria-labelledby="metaResumenTitle">
+            <div class="meta-mensual-header">
+                <div style="display:flex;align-items:flex-start;gap:0.75rem;min-width:0;">
+                    <div class="meta-mensual-header-icon" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    </div>
+                    <div style="min-width:0;">
+                        <h3 class="meta-mensual-header-title" id="metaResumenTitle">Resumen de metas</h3>
+                        <p id="metaResumenSub" class="meta-mensual-header-sub">Metas de tu departamento (solo lectura).</p>
+                    </div>
+                </div>
+                <button type="button" onclick="cerrarModalResumenMetas()" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg transition flex-shrink-0" aria-label="Cerrar" style="background:transparent;border:none;cursor:pointer;">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                </button>
+            </div>
+            <div class="meta-mensual-body">
+                <div class="meta-mensual-toolbar">
+                    <div class="meta-mensual-toolbar-field">
+                        <label for="metaResumenAnio">Año</label>
+                        <select id="metaResumenAnio" onchange="cargarResumenMetas()"></select>
+                    </div>
+                </div>
+                <div id="metaResumenLoading" class="meta-resumen-loading hidden">Cargando resumen…</div>
+                <div id="metaResumenError" class="meta-mensual-empty hidden"></div>
+                <div id="metaResumenPreviewWrap" class="meta-resumen-preview-scroll hidden">
+                    <div id="metaResumenPreviewContent"></div>
+                </div>
+            </div>
+            <div class="meta-mensual-footer">
+                <p class="meta-mensual-footer-note">Vista de solo lectura. RH actualiza las metas; al consultar de nuevo verás los datos más recientes.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="<?php echo kaizen_asset_src('gerente-shell.js', __DIR__ . '/gerente-shell.js'); ?>"></script>
     <script>
         window.GERENTE_CTX = {
@@ -321,6 +362,7 @@ if (count($partesNombre) >= 2) {
     <script src="<?php echo kaizen_asset_src('../assets/puesto-empleado.js', __DIR__ . '/../assets/puesto-empleado.js'); ?>"></script>
     <script src="<?php echo kaizen_asset_src('../assets/dashboard-notificaciones.js', __DIR__ . '/../assets/dashboard-notificaciones.js'); ?>"></script>
     <script src="<?php echo kaizen_asset_src('../assets/evaluacion-reporte.js', __DIR__ . '/../assets/evaluacion-reporte.js'); ?>"></script>
+    <script src="<?php echo kaizen_asset_src('../assets/meta-resumen.js', __DIR__ . '/../assets/meta-resumen.js'); ?>"></script>
     <script src="<?php echo kaizen_asset_src('gerente-dashboard.js', __DIR__ . '/gerente-dashboard.js'); ?>"></script>
     <script src="<?php echo kaizen_asset_src('../assets/plazo-revision.js', __DIR__ . '/../assets/plazo-revision.js'); ?>"></script>
     <script src="<?php echo kaizen_asset_src('../assets/logout-animation.js', __DIR__ . '/../assets/logout-animation.js'); ?>"></script>

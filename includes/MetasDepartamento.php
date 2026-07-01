@@ -1220,6 +1220,53 @@ class MetasDepartamento
         return ['anio' => $anio, 'plantillas' => $plantillas];
     }
 
+    /** Resumen anual de un solo departamento (gerente / supervisor de área). */
+    public static function obtenerPlantillasResumenDepartamento(
+        mysqli $conexion,
+        string $departamento,
+        int $anio
+    ): array {
+        self::asegurarEsquema($conexion);
+
+        $dep = self::normalizarDepartamento($departamento);
+        if ($dep === null) {
+            return ['anio' => $anio, 'departamento' => '', 'plantillas' => []];
+        }
+
+        $plantillas = [];
+
+        if (self::esConsolidadoEn($dep)) {
+            $consolidada = self::obtenerPlantillaConsolidadaEn($conexion, $anio);
+            foreach ($consolidada['lineas'] as $linea) {
+                $plantillas[] = self::construirPlantillaResumen(
+                    $linea['departamento'],
+                    array_values($linea['meses']),
+                    'en_linea',
+                    'EN'
+                );
+            }
+            $plantillas[] = self::construirPlantillaResumen(
+                'EN (Total)',
+                array_values($consolidada['totales']),
+                'en_total',
+                'EN'
+            );
+        } else {
+            $plantillas[] = self::construirPlantillaResumen(
+                $dep,
+                array_values(self::obtenerPlantillaAnual($conexion, $dep, $anio)),
+                'normal',
+                null
+            );
+        }
+
+        return [
+            'anio' => $anio,
+            'departamento' => $dep,
+            'plantillas' => $plantillas,
+        ];
+    }
+
     /** @param array<int, array<string, mixed>> $meses */
     private static function construirPlantillaResumen(
         string $label,
