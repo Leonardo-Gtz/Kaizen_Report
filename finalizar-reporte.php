@@ -9,6 +9,7 @@ error_reporting(0);
 
 include 'conexion.php';
 require_once __DIR__ . '/includes/PlazoRevision.php';
+require_once __DIR__ . '/includes/OptimizarImagen.php';
 header('Content-Type: application/json');
 
 if (!isset($conexion) || !$conexion) {
@@ -34,7 +35,7 @@ try {
     $conexion->autocommit(false);
 
     // Validar que el reporte existe, es borrador y tiene imágenes obligatorias
-    $sqlCheck = "SELECT id, estado, imagen_anterior, imagen_mejora FROM reportes WHERE id = ? AND estado = 'borrador'";
+    $sqlCheck = "SELECT id, estado, fecha, imagen_anterior, imagen_mejora FROM reportes WHERE id = ? AND estado = 'borrador'";
     $stmtCheck = $conexion->prepare($sqlCheck);
     $stmtCheck->bind_param('i', $idReporte);
     $stmtCheck->execute();
@@ -51,6 +52,9 @@ try {
         throw new Exception('El reporte debe incluir imagen anterior e imagen de mejora antes de enviarse');
     }
     $stmtCheck->close();
+
+    OptimizarImagen::optimizarRuta($imgAnterior, $borrador['fecha'] ?? '');
+    OptimizarImagen::optimizarRuta($imgMejora, $borrador['fecha'] ?? '');
 
     PlazoRevision::asegurarEsquema($conexion);
     $fechaLimite = PlazoRevision::calcularFechaLimiteRevision(date('Y-m-d H:i:s'));

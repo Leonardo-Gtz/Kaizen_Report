@@ -111,6 +111,8 @@ register_shutdown_function(function() {
 // ------------------------------------------------------------------------------
 
 include 'conexion.php';
+require_once __DIR__ . '/includes/KaizenUploads.php';
+require_once __DIR__ . '/includes/OptimizarImagen.php';
 header('Content-Type: application/json');
 
 if (!isset($conexion) || !$conexion) {
@@ -181,9 +183,8 @@ try {
         throw new Exception('Los campos tema y fecha son obligatorios');
     }
 
-    $uploadDir = 'uploads/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+    if (!is_dir('uploads') && !mkdir('uploads', 0755, true)) {
+        throw new Exception('No se pudo crear la carpeta uploads');
     }
 
     function generarNombreSeguro($nombreOriginal, $prefijo = '') {
@@ -220,7 +221,7 @@ try {
     if (isset($_FILES['archivo_riesgo']) && $_FILES['archivo_riesgo']['error'] === UPLOAD_ERR_OK) {
         // Eliminar archivo anterior
         if ($archivoRiesgoPath && file_exists($archivoRiesgoPath)) {
-            @unlink($archivoRiesgoPath);
+            KaizenUploads::eliminarArchivoSeguro($archivoRiesgoPath);
             app_log("Archivo de riesgo anterior eliminado: {$archivoRiesgoPath}", 'DEBUG');
         }
         
@@ -235,9 +236,10 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($archivo['name'], 'borrador_riesgo_');
-        $archivoRiesgoPath = $uploadDir . $nombreSeguro;
+        $archivoRiesgoPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($archivo['tmp_name'], $archivoRiesgoPath)) {
+        if (!move_uploaded_file($archivo['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar el archivo de riesgo');
         }
         app_log("Archivo de riesgo guardado: {$archivoRiesgoPath}", 'DEBUG');
@@ -246,7 +248,7 @@ try {
     if (isset($_FILES['imagen_anterior']) && $_FILES['imagen_anterior']['error'] === UPLOAD_ERR_OK) {
         // Eliminar imagen anterior
         if ($imgAnteriorPath && file_exists($imgAnteriorPath)) {
-            @unlink($imgAnteriorPath);
+            KaizenUploads::eliminarArchivoSeguro($imgAnteriorPath);
             app_log("Imagen anterior eliminada: {$imgAnteriorPath}", 'DEBUG');
         }
         
@@ -262,18 +264,20 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($imagen['name'], 'borrador_anterior_');
-        $imgAnteriorPath = $uploadDir . $nombreSeguro;
+        $imgAnteriorPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($imagen['tmp_name'], $imgAnteriorPath)) {
+        if (!move_uploaded_file($imagen['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar imagen anterior');
         }
+        OptimizarImagen::despuesDeSubir($imgAnteriorPath, $fecha);
         app_log("Imagen anterior guardada: {$imgAnteriorPath}", 'DEBUG');
     }
 
     if (isset($_FILES['imagen_mejora']) && $_FILES['imagen_mejora']['error'] === UPLOAD_ERR_OK) {
         // Eliminar imagen anterior
         if ($imgMejoraPath && file_exists($imgMejoraPath)) {
-            @unlink($imgMejoraPath);
+            KaizenUploads::eliminarArchivoSeguro($imgMejoraPath);
             app_log("Imagen de mejora anterior eliminada: {$imgMejoraPath}", 'DEBUG');
         }
         
@@ -289,11 +293,13 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($imagen['name'], 'borrador_mejora_');
-        $imgMejoraPath = $uploadDir . $nombreSeguro;
+        $imgMejoraPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($imagen['tmp_name'], $imgMejoraPath)) {
+        if (!move_uploaded_file($imagen['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar imagen de mejora');
         }
+        OptimizarImagen::despuesDeSubir($imgMejoraPath, $fecha);
         app_log("Imagen de mejora guardada: {$imgMejoraPath}", 'DEBUG');
     }
 

@@ -2,6 +2,9 @@
 uploads/*
 !uploads/.gitkeep
 
+# Respaldo local: legado, pruebas, librerías viejas, huérfanos (no subir a prod)
+_respaldo-proyecto/
+
 # Logs locales
 logs/*
 !logs/.gitkeep

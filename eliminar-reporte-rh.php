@@ -18,29 +18,11 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'rh') {
 }
 
 require 'conexion.php';
+require_once __DIR__ . '/includes/KaizenUploads.php';
 
 function eliminarArchivoReporteSeguro(?string $rutaRelativa): void
 {
-    if ($rutaRelativa === null || trim($rutaRelativa) === '') {
-        return;
-    }
-    $rutaRelativa = str_replace('\\', '/', trim($rutaRelativa));
-    $rutaRelativa = ltrim($rutaRelativa, '/');
-    if (strpos($rutaRelativa, '..') !== false) {
-        return;
-    }
-    if (strpos($rutaRelativa, 'uploads/') !== 0) {
-        $rutaRelativa = 'uploads/' . basename($rutaRelativa);
-    }
-    $base = realpath(__DIR__ . '/uploads');
-    if ($base === false) {
-        return;
-    }
-    $full = realpath(__DIR__ . '/' . $rutaRelativa);
-    if ($full === false || strpos($full, $base) !== 0 || !is_file($full)) {
-        return;
-    }
-    @unlink($full);
+    KaizenUploads::eliminarArchivoSeguro($rutaRelativa);
 }
 
 try {

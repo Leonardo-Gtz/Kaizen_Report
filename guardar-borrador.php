@@ -5,6 +5,8 @@ error_reporting(0);
 
 // Incluir conexión
 include 'conexion.php';
+require_once __DIR__ . '/includes/KaizenUploads.php';
+require_once __DIR__ . '/includes/OptimizarImagen.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -50,16 +52,11 @@ try {
         throw new Exception('Los campos tema y fecha son obligatorios para guardar el borrador');
     }
 
-    // Crear carpeta uploads si no existe
-    $uploadDir = 'uploads/';
-    if (!is_dir($uploadDir)) {
-        if (!mkdir($uploadDir, 0755, true)) {
-            throw new Exception('No se pudo crear la carpeta uploads');
-        }
+    // Crear carpeta uploads si no existe (histórico plano)
+    if (!is_dir('uploads') && !mkdir('uploads', 0755, true)) {
+        throw new Exception('No se pudo crear la carpeta uploads');
     }
-
-    // Verificar permisos de escritura
-    if (!is_writable($uploadDir)) {
+    if (!is_writable('uploads')) {
         throw new Exception('No hay permisos de escritura en la carpeta uploads');
     }
 
@@ -91,9 +88,10 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($archivo['name'], 'borrador_riesgo_');
-        $archivoRiesgoPath = $uploadDir . $nombreSeguro;
+        $archivoRiesgoPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($archivo['tmp_name'], $archivoRiesgoPath)) {
+        if (!move_uploaded_file($archivo['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar el archivo de riesgo');
         }
     }
@@ -115,11 +113,13 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($imagen['name'], 'borrador_anterior_');
-        $imgAnteriorPath = $uploadDir . $nombreSeguro;
+        $imgAnteriorPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($imagen['tmp_name'], $imgAnteriorPath)) {
+        if (!move_uploaded_file($imagen['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar imagen anterior');
         }
+        OptimizarImagen::despuesDeSubir($imgAnteriorPath, $fecha);
     }
 
     // Procesar imagen mejora (opcional en borrador)
@@ -139,11 +139,13 @@ try {
         }
         
         $nombreSeguro = generarNombreSeguro($imagen['name'], 'borrador_mejora_');
-        $imgMejoraPath = $uploadDir . $nombreSeguro;
+        $imgMejoraPath = KaizenUploads::construirRuta($fecha, $nombreSeguro);
+        $destinoAbs = KaizenUploads::rutaAbsolutaParaGuardar($fecha, $nombreSeguro);
         
-        if (!move_uploaded_file($imagen['tmp_name'], $imgMejoraPath)) {
+        if (!move_uploaded_file($imagen['tmp_name'], $destinoAbs)) {
             throw new Exception('Error al guardar imagen de mejora');
         }
+        OptimizarImagen::despuesDeSubir($imgMejoraPath, $fecha);
     }
 
     // Iniciar transacción

@@ -1,4 +1,0 @@
-Buscar en dashboard.php la línea que contiene:
-${r.participantes.map(p => `
-
-Y verificar qué está usando para el avatar.
