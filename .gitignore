@@ -2,6 +2,10 @@
 uploads/*
 !uploads/.gitkeep
 
+# Excel exportados desde RH (se generan en el servidor, no en git)
+exportaciones/*
+!exportaciones/.gitkeep
+
 # Respaldo local: legado, pruebas, librerías viejas, huérfanos (no subir a prod)
 _respaldo-proyecto/
 
