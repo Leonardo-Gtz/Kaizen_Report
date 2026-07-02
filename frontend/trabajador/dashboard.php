@@ -448,7 +448,7 @@ if (count($partesNombre) >= 2) {
                                 placeholder="Describe la situación antes de la mejora"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Imagen Situación Anterior</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Imagen Situación Anterior <span class="text-gray-400 font-normal">(opcional)</span></label>
                             <div class="border-2 border-dashed border-gray-200 rounded-lg p-3">
                                 <div id="prevAnterior" class="hidden mb-2">
                                     <img id="imgPrevAnterior" src="" alt="" class="max-h-32 mx-auto rounded object-contain">
@@ -478,7 +478,7 @@ if (count($partesNombre) >= 2) {
                                 placeholder="Describe la mejora implementada"></textarea>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Imagen de la Mejora</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Imagen de la Mejora <span class="text-gray-400 font-normal">(opcional)</span></label>
                             <div class="border-2 border-dashed border-gray-200 rounded-lg p-3">
                                 <div id="prevMejora" class="hidden mb-2">
                                     <img id="imgPrevMejora" src="" alt="" class="max-h-32 mx-auto rounded object-contain">

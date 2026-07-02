@@ -34,7 +34,7 @@ try {
 
     $conexion->autocommit(false);
 
-    // Validar que el reporte existe, es borrador y tiene imágenes obligatorias
+    // Validar que el reporte existe y sigue en borrador
     $sqlCheck = "SELECT id, estado, fecha, imagen_anterior, imagen_mejora FROM reportes WHERE id = ? AND estado = 'borrador'";
     $stmtCheck = $conexion->prepare($sqlCheck);
     $stmtCheck->bind_param('i', $idReporte);
@@ -48,13 +48,14 @@ try {
     $borrador = $result->fetch_assoc();
     $imgAnterior = trim((string) ($borrador['imagen_anterior'] ?? ''));
     $imgMejora = trim((string) ($borrador['imagen_mejora'] ?? ''));
-    if ($imgAnterior === '' || $imgMejora === '') {
-        throw new Exception('El reporte debe incluir imagen anterior e imagen de mejora antes de enviarse');
-    }
     $stmtCheck->close();
 
-    OptimizarImagen::optimizarRuta($imgAnterior, $borrador['fecha'] ?? '');
-    OptimizarImagen::optimizarRuta($imgMejora, $borrador['fecha'] ?? '');
+    if ($imgAnterior !== '') {
+        OptimizarImagen::optimizarRuta($imgAnterior, $borrador['fecha'] ?? '');
+    }
+    if ($imgMejora !== '') {
+        OptimizarImagen::optimizarRuta($imgMejora, $borrador['fecha'] ?? '');
+    }
 
     PlazoRevision::asegurarEsquema($conexion);
     $fechaLimite = PlazoRevision::calcularFechaLimiteRevision(date('Y-m-d H:i:s'));

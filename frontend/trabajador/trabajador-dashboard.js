@@ -1555,18 +1555,6 @@
 
             // Si hay borrador, primero actualizarlo y luego finalizar
             if (idBorrador) {
-                const imgAnt = obtenerArchivoImagen('imagen_anterior');
-                const imgMej = obtenerArchivoImagen('imagen_mejora');
-                const borradorRef = borradoresActuales.find(x => String(x.id) === String(idBorrador));
-                const tieneImagenesNuevas = !!(imgAnt && imgMej);
-                const tieneImagenesGuardadas = !!(
-                    borradorRef?.imagen_anterior && borradorRef?.imagen_mejora
-                );
-                if (!tieneImagenesNuevas && !tieneImagenesGuardadas) {
-                    mostrarMensaje('Debes agregar la imagen anterior y la de mejora antes de enviar', 'error');
-                    return;
-                }
-
                 const fd = buildFormData();
                 fd.append('id_reporte', idBorrador);
                 try {
@@ -1587,13 +1575,6 @@
                     mostrarMensaje(e.message || 'Error de conexión', 'error');
                 }
             } else {
-                const imgAnt = obtenerArchivoImagen('imagen_anterior');
-                const imgMej = obtenerArchivoImagen('imagen_mejora');
-                if (!imgAnt || !imgMej) {
-                    mostrarMensaje('Debes agregar la imagen anterior y la de mejora antes de enviar', 'error');
-                    return;
-                }
-                // Crear nuevo reporte directamente como finalizado
                 const fd = buildFormData();
                 try {
                     const res = await fetch('../../guardar-reporte.php', { method: 'POST', body: fd });
